@@ -15,5 +15,8 @@ export function CalculatePriceUseCase(products: Product[]): number {
   if (products.length === 0) {
     return 0;
   }
-  return products[0].quantity * products[0].price;
+
+  return products.reduce((total, product) => {
+    return total + product.price * product.quantity;
+  }, 0);
 }
