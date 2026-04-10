@@ -35,6 +35,10 @@ export class CalculatePriceUseCase {
 
     const reduction = await this.reductionGateway.getReductionByCode(code);
 
+    if (reduction.minAmount && total < reduction.minAmount) {
+      return total;
+    }
+
     if (reduction.type === "FIXED") {
       return Math.max(total - reduction.amount, 0);
     }
