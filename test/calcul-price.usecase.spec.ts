@@ -1,10 +1,14 @@
 import { describe, expect, test, beforeEach } from "vitest";
 import { Product, CalculatePriceUseCase } from "../app/calcul-price.usecase";
 
-
 describe("CalculatePriceUseCase TESTS", () => {
+  const reductionGatewayStub = {
+    getReductionByCode: async () => ({ type: "FIXED", amount: 0 })
+  };
+
   test("For no products", async () => {
-    expect(CalculatePriceUseCase([])).toBe(0);
+    const usecase = new CalculatePriceUseCase(reductionGatewayStub);
+    expect(await usecase.execute([])).toBe(0);
   });
 
   test("Devrait retourner le total du panier contenant un seul produit", async () => {
@@ -16,10 +20,11 @@ describe("CalculatePriceUseCase TESTS", () => {
         price: 20,
       },
     ]; 
-    expect(CalculatePriceUseCase(products)).toBe(40);
+    const usecase = new CalculatePriceUseCase(reductionGatewayStub);
+    expect(await usecase.execute(products)).toBe(40);
   });
 
-  test("Devrait retourner le total du panier contenant plusieurs produits", () => {
+  test("Devrait retourner le total du panier contenant plusieurs produits", async () => {
     const products: Product[] = [
       {
         name: "T-shirt",
@@ -34,7 +39,27 @@ describe("CalculatePriceUseCase TESTS", () => {
         price: 30,
       },
     ];
-    expect(CalculatePriceUseCase(products)).toBe(100);
+    const usecase = new CalculatePriceUseCase(reductionGatewayStub);
+    expect(await usecase.execute(products)).toBe(100);
+  });
+  test("Devrait appliquer une reduction/promo fixe", async () => {    
+    const products = [
+      { name: "T-shirt", price: 20, quantity: 2, type: "TSHIRT"},
+      { name: "Pull", price: 30, quantity: 2, type: "PULL" },
+    ];
+
+    // Stub de reductionGateway
+    const reductionGatewaySub ={
+      getReductionByCode: async(code: string) => ({
+        type : "FIXED",
+        amount : 30
+      })
+    };
+    const usecase = new CalculatePriceUseCase(reductionGatewaySub);
+
+    //const usecase = new CalculatePriceUseCase(reductionGateway as any);
+    const total = await usecase.execute(products, "PROMO30");
+    expect(total).toBe(70);
   });
 
 });
