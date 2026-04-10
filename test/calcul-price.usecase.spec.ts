@@ -124,4 +124,23 @@ describe("CalculatePriceUseCase TESTS", () => {
     expect(result).toBe(95);
   });
 
+  test("Devrait appliquer un effet 'achete en get un gratuit' sur un type de produit spécifique", async () => {
+    const products = [
+      { name: "T-shirt", price: 20, quantity: 3, type: "TSHIRT" }
+    ];
+
+    const reductionGatewayStub = {
+      getReductionByCode: async (code: string) => ({
+        type: "BOGO",
+        productType: "TSHIRT"
+      })
+    };
+
+    const usecase = new CalculatePriceUseCase(reductionGatewayStub);
+
+    const result = await usecase.execute(products, "BOGO");
+
+    expect(result).toBe(40);
+});
+
 });
