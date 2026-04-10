@@ -83,4 +83,24 @@ describe("CalculatePriceUseCase TESTS", () => {
     expect(total).toBe(20);
   });
 
+  test("devrait appliquer une reduction de pourcentage sur le total", async () => {
+    const products = [
+      { name: "T-shirt", price: 50, quantity: 1, type: "TSHIRT" },
+      { name: "Pull", price: 50, quantity: 1, type: "PULL" }
+    ];
+
+    const reductionGatewayStub = {
+      getReductionByCode: async (code: string) => ({
+        type: "PERCENTAGE",
+        amount: 10 // correspond a la reduction de 10%
+      })
+    };
+
+    const usecase = new CalculatePriceUseCase(reductionGatewayStub);
+
+    const result = await usecase.execute(products, "PROMO10");
+
+    expect(result).toBe(90);
+  });
+
 });
