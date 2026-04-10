@@ -45,7 +45,6 @@ export class CalculatePriceUseCase {
         return Math.max(total - reduction.amount, 0);
       }
       case "PERCENTAGE" : {
-        
         if (reduction.productType) {
           const targetSubtotal = products
             .filter(p => p.type === reduction.productType)
@@ -57,6 +56,17 @@ export class CalculatePriceUseCase {
         }
 
         return total * (1 - reduction.amount / 100);
+      }
+      case "BOGO" : {
+        if (reduction.productType) {
+          for (const product of products) {
+            if (product.type === reduction.productType) {
+              const freeItems = Math.floor(product.quantity / 2);
+              const discount = freeItems * product.price;
+              return total - discount;
+            }
+          }
+        }
       }
     }
     return total;
