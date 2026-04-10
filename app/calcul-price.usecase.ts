@@ -1,3 +1,4 @@
+import { Switch } from "frontend/src/components/ui/switch";
 import { ReductionGateway } from "./reduction.gateway";
 
 export type ProductsType = "TSHIRT" | "PULL";
@@ -39,10 +40,14 @@ export class CalculatePriceUseCase {
       return total;
     }
 
-    if (reduction.type === "FIXED") {
-      return Math.max(total - reduction.amount, 0);
+    switch (reduction.type) {
+      case "FIXED" :{ 
+        return Math.max(total - reduction.amount, 0);
+      }
+      case "PERCENTAGE" : {
+        return total * (1 - reduction.amount / 100);
+      }
     }
-
     return total;
   }
 }
