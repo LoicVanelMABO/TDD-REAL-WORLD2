@@ -143,4 +143,28 @@ describe("CalculatePriceUseCase TESTS", () => {
     expect(result).toBe(40);
 });
 
+test("devrait appliquer les promotions dans le bon ordre (BOGO puis PERCENTAGE)", async () => {
+  const products = [
+    { name: "T-shirt", price: 20, quantity: 2, type: "TSHIRT" }
+  ];
+
+  const reductionGatewayStub = {
+    getReductionByCode: async (code: string) => {
+      if (code === "BOGO") {
+        return { type: "BOGO", productType: "TSHIRT" };
+      }
+      if (code === "PROMO10") {
+        return { type: "PERCENTAGE", amount: 10 };
+      }
+    }
+  };
+
+  const usecase = new CalculatePriceUseCase(reductionGatewayStub);
+
+  // ⚠️ on passe plusieurs codes
+  const result = await usecase.execute(products, ["BOGO", "PROMO10"]);
+
+  expect(result).toBe(18);
+});
+
 });
