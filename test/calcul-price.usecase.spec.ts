@@ -42,6 +42,7 @@ describe("CalculatePriceUseCase TESTS", () => {
     const usecase = new CalculatePriceUseCase(reductionGatewayStub);
     expect(await usecase.execute(products)).toBe(100);
   });
+
   test("Devrait appliquer une reduction/promo fixe", async () => {    
     const products = [
       { name: "T-shirt", price: 20, quantity: 2, type: "TSHIRT"},
@@ -60,6 +61,26 @@ describe("CalculatePriceUseCase TESTS", () => {
     //const usecase = new CalculatePriceUseCase(reductionGateway as any);
     const total = await usecase.execute(products, "PROMO30");
     expect(total).toBe(70);
+  });
+
+  test("should not apply discount if minAmount is not reached", async () => {
+    const products = [
+      { name: "T-shirt", price: 20, quantity: 1, type: "TSHIRT" }
+    ];
+
+    const reductionGatewayStub = {
+      getReductionByCode: async (code: string) => ({
+        type: "FIXED",
+        amount: 10,
+        minAmount: 30
+      })
+    };
+
+    const usecase = new CalculatePriceUseCase(reductionGatewayStub);
+
+    const result = await usecase.execute(products, "PROMO10");
+
+    expect(result).toBe(20);
   });
 
 });
